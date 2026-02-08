@@ -13,7 +13,7 @@ Which skill or command is affected?
 - [ ] `/plangate:gate`
 - [ ] `/plangate:phase`
 - [ ] `/plangate:investigate`
-- [ ] `/plangate:supabase-migrate`
+- [ ] `/plangate:status`
 - [ ] Session-start hook
 - [ ] Other: ___
 
@@ -43,4 +43,4 @@ Describe the expected behavior.
 
 - OS: (macOS / Linux / WSL)
 - Claude Code version: (`claude --version`)
-- Plugin installed via: (file:// path / marketplace)
+- Plugin installed via: (marketplace / local path)

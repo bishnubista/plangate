@@ -10,7 +10,6 @@ project_dir="${CLAUDE_PROJECT_DIR:-.}"
 # --- Stack detection ---
 stack=""
 pkg_manager=""
-has_supabase=false
 has_custom_config=false
 
 if [[ -f "$project_dir/pyproject.toml" ]]; then
@@ -64,13 +63,23 @@ if [[ -f "$project_dir/package.json" ]]; then
   fi
 fi
 
-if [[ -d "$project_dir/supabase" || -f "$project_dir/supabase/config.toml" ]]; then
-  has_supabase=true
-fi
-
 if [[ -f "$project_dir/.plangate.json" ]]; then
   has_custom_config=true
 fi
+
+_plangate_jq_warned=false
+read_custom_cmd() {
+  local key="$1"
+  if command -v jq >/dev/null 2>&1; then
+    jq -r --arg key "$key" '.commands[$key] | select(type=="string")' "$project_dir/.plangate.json" 2>/dev/null || true
+  else
+    if [[ "$_plangate_jq_warned" == "false" ]]; then
+      echo "plangate: jq not found; falling back to grep/sed for .plangate.json (may fail on escaped quotes or special characters)" >&2
+      _plangate_jq_warned=true
+    fi
+    grep -o "\"${key}\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$project_dir/.plangate.json" 2>/dev/null | sed 's/.*:.*"\(.*\)"/\1/' || true
+  fi
+}
 
 # --- Resolve validation commands ---
 # Custom config overrides stack-detected defaults
@@ -80,11 +89,11 @@ cmd_build=""
 cmd_test=""
 
 if [[ "$has_custom_config" == "true" ]]; then
-  # Read commands from .plangate.json (best-effort parsing with grep)
-  cmd_typecheck=$(grep -o '"typecheck"[[:space:]]*:[[:space:]]*"[^"]*"' "$project_dir/.plangate.json" 2>/dev/null | sed 's/.*:.*"\(.*\)"/\1/' || true)
-  cmd_lint=$(grep -o '"lint"[[:space:]]*:[[:space:]]*"[^"]*"' "$project_dir/.plangate.json" 2>/dev/null | sed 's/.*:.*"\(.*\)"/\1/' || true)
-  cmd_build=$(grep -o '"build"[[:space:]]*:[[:space:]]*"[^"]*"' "$project_dir/.plangate.json" 2>/dev/null | sed 's/.*:.*"\(.*\)"/\1/' || true)
-  cmd_test=$(grep -o '"test"[[:space:]]*:[[:space:]]*"[^"]*"' "$project_dir/.plangate.json" 2>/dev/null | sed 's/.*:.*"\(.*\)"/\1/' || true)
+  # Read commands from .plangate.json (jq when available, grep fallback)
+  cmd_typecheck=$(read_custom_cmd "typecheck")
+  cmd_lint=$(read_custom_cmd "lint")
+  cmd_build=$(read_custom_cmd "build")
+  cmd_test=$(read_custom_cmd "test")
 else
   case "${pkg_manager:-none}" in
     bun)
@@ -147,13 +156,12 @@ fi
 # --- Emit manifest ---
 cat <<EOF
 <plangate-manifest>
-Stack: ${stack:-unknown} | Package manager: ${pkg_manager:-none} | Supabase: ${has_supabase} | Custom config: ${has_custom_config}
+Stack: ${stack:-unknown} | Package manager: ${pkg_manager:-none} | Custom config: ${has_custom_config}
 Commands: typecheck=${cmd_typecheck:-SKIP} | lint=${cmd_lint:-SKIP} | build=${cmd_build:-SKIP} | test=${cmd_test:-SKIP}
 
 Auto-invocable skills (Claude can use directly):
   plangate:gate              — Typecheck + lint + build validation. ALWAYS run before creating PRs.
   plangate:status            — Show current phase, task progress, and orchestration state.
-  plangate:supabase-migrate  — After DDL changes: regen types, check RLS/indexes.
 
 User-invoked workflows (run via / commands):
   /plangate:orchestrate [N]        — Multi-task orchestration with sequential gates.
@@ -162,10 +170,8 @@ User-invoked workflows (run via / commands):
   /plangate:status                 — Quick project progress overview.
 
 Rules:
-  - If stack is Next.js + bun + Supabase, prefer Bun-first validation/build commands.
   - Always run plangate:gate before creating any PR.
-  - After Supabase migrations, run plangate:supabase-migrate.
-  - Do NOT invoke orchestrate, phase, or investigate via the Skill tool. These are user-triggered only.
   - Use the Commands line above for validation. SKIP means that stage should be skipped.
+  - Do NOT invoke orchestrate, phase, or investigate via the Skill tool. These are user-triggered only.
 </plangate-manifest>
 EOF

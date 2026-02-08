@@ -143,16 +143,11 @@ For each task in the phase:
    +-- If issues found: dispatch fix subagent > re-review (max 2 retries)
    +-- Update .plangate/orchestration-state.json
 
-4. SUPABASE MIGRATION HOOK (conditional)
-   +-- If task touches DDL/migrations: invoke plangate:supabase-migrate
-   +-- Re-run build gate after types regeneration
-   +-- Update .plangate/orchestration-state.json
-
-5. UPDATE PLAN.MD
+4. UPDATE PLAN.MD
    +-- Check off completed task
    +-- Update .plangate/orchestration-state.json
 
-6. NEXT TASK
+5. NEXT TASK
 ```
 
 ### After All Tasks Complete
@@ -264,27 +259,7 @@ After the reviewer approves, update the checkpoint file with review stage status
 
 ---
 
-## Stage 4: Supabase Migration Hook (Conditional)
-
-After review approval and before updating `PLAN.md`, determine whether the task touched Supabase DDL.
-
-Treat it as DDL/migration work if ANY of these are true:
-- Task text references migrations, DDL, policies, or schema changes
-- Changed files include `supabase/migrations/*.sql`
-- Changed files include `supabase/schema.sql` or `supabase/seed.sql`
-- Reviewer/implementer reports mention `CREATE TABLE`, `ALTER TABLE`, or RLS policy changes
-
-If DDL/migrations were touched:
-1. Invoke `plangate:supabase-migrate`
-2. Ensure regenerated types are staged
-3. Re-run Stage 2 build gate before proceeding
-4. Update the checkpoint file
-
-If no DDL/migration changes were made, skip this step.
-
----
-
-## Stage 5: Update PLAN.md
+## Stage 4: Update PLAN.md
 
 After a task passes all gates:
 1. Read PLAN.md
@@ -330,6 +305,5 @@ You (the orchestrator) read every subagent report, run every build gate, and mak
 
 - Composes with `plangate:gate` for final validation
 - Composes with `plangate:phase finish` for PR creation
-- Invokes `plangate:supabase-migrate` automatically for Supabase DDL tasks
 - Updates PLAN.md checkboxes for progress tracking
 - Maintains `.plangate/orchestration-state.json` for checkpoint/resume capability

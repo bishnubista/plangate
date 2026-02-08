@@ -1,15 +1,17 @@
 # Contributing
 
-plangate is a Claude Code plugin — Markdown skills, Markdown commands, and a Bash hook. No build step, no dependencies.
+plangate is a Claude Code plugin — Markdown skills and a Bash hook. No build step, no dependencies.
 
 ## Structure
 
 ```text
 .claude-plugin/plugin.json       # Plugin metadata
+.claude-plugin/marketplace.json  # Marketplace catalog
 agents/*.md                      # Specialized agent definitions
-commands/*.md                    # Slash command wrappers (/plangate:*)
 skills/*/SKILL.md                # Skill definitions (workflow logic)
 hooks/session-start.sh           # Stack detection hook
+MARKETPLACE_SUBMISSION.md        # Submission copy/prompt pack
+assets/*.svg                     # Marketplace listing assets
 try-plangate.sh                  # Plugin verification script
 ```
 
@@ -18,18 +20,18 @@ try-plangate.sh                  # Plugin verification script
 ```bash
 git clone https://github.com/bishnubista/plangate.git
 cd plangate
-./try-plangate.sh                # 55 structure checks
+./try-plangate.sh                # Structure + hook output checks
 ./try-plangate.sh --scaffold     # Create a test project
+claude plugin validate .         # Marketplace manifest validation
 ```
 
 ## Adding a Skill
 
 1. Create `skills/{name}/SKILL.md` with frontmatter (`name`, `description`)
-2. Create `commands/{name}.md` as a thin wrapper
-3. Set `disable-model-invocation: true` on side-effect skills (creates branches/commits/PRs)
-4. Update `hooks/session-start.sh` manifest
-5. Update README skills table
-6. Run `./try-plangate.sh`
+2. Set `disable-model-invocation: true` on side-effect skills (creates branches/commits/PRs)
+3. Update `hooks/session-start.sh` manifest
+4. Update README skills table
+5. Run `./try-plangate.sh`
 
 ## Pull Requests
 

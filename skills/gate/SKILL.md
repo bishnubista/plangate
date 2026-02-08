@@ -1,13 +1,13 @@
 ---
 name: gate
-description: "Bun + Next.js + Supabase-first pre-PR gate. Auto-detects stack, validates typecheck + lint + build + tests, and never auto-fixes."
+description: "Stack-aware pre-PR validation gate. Auto-detects stack, validates typecheck + lint + build + tests. Use when the user says 'run gate', 'validate', 'check before PR', or 'run checks'."
 ---
 
 # Pre-PR Gate: Stack-Aware Validation Pipeline
 
 ## Overview
 
-Validates the project is in a clean, passing state before PR creation. The primary profile is Bun + Next.js + Supabase; for other stacks, use the fallback command paths below. This skill is **read-only** — it reports pass/fail with actionable suggestions but never modifies code.
+Validates the project is in a clean, passing state before PR creation. Auto-detects the stack from the session manifest and selects the appropriate validation commands. Supports 6 language stacks (Node.js, Python, Kotlin, Go, Rust, Swift) with 9 toolchain configurations. This skill is **read-only** — it reports pass/fail with actionable suggestions but never modifies code.
 
 ## The Process
 

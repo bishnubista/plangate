@@ -37,6 +37,10 @@ header "Plugin Structure"
   && pass "plugin.json exists" \
   || fail "plugin.json missing — not a valid Claude Code plugin"
 
+[[ -f "$PLUGIN_DIR/.claude-plugin/marketplace.json" ]] \
+  && pass "marketplace.json exists" \
+  || fail "marketplace.json missing — required for marketplace publishing"
+
 [[ -f "$PLUGIN_DIR/LICENSE" ]] \
   && pass "LICENSE exists" \
   || warn "LICENSE missing"
@@ -49,7 +53,7 @@ header "Plugin Structure"
 
 header "Skills"
 
-expected_skills=(orchestrate gate phase investigate status supabase-migrate)
+expected_skills=(orchestrate gate phase investigate status)
 for skill in "${expected_skills[@]}"; do
   if [[ -f "$PLUGIN_DIR/skills/$skill/SKILL.md" ]]; then
     # Check frontmatter has name field
@@ -63,18 +67,15 @@ for skill in "${expected_skills[@]}"; do
   fi
 done
 
-# ─── Commands Check ───────────────────────────────────────────────────
+# ─── Legacy Commands Check ────────────────────────────────────────────
 
-header "Commands"
+header "Legacy Commands"
 
-expected_commands=(orchestrate gate phase investigate status supabase-migrate)
-for cmd in "${expected_commands[@]}"; do
-  if [[ -f "$PLUGIN_DIR/commands/$cmd.md" ]]; then
-    pass "commands/$cmd.md — exists"
-  else
-    fail "commands/$cmd.md — missing"
-  fi
-done
+if [[ -d "$PLUGIN_DIR/commands" ]]; then
+  warn "commands/ directory present — legacy command wrappers are deprecated; prefer skills/"
+else
+  pass "No commands/ directory (skills-only plugin layout)"
+fi
 
 # ─── Hooks Check ──────────────────────────────────────────────────────
 
@@ -141,16 +142,14 @@ assert_contains "$hook_out" "typecheck=bunx tsc --noEmit" "bun+Next.js → typec
 assert_contains "$hook_out" "build=bun run build" "bun+Next.js → build command"
 assert_contains "$hook_out" "plangate:status" "bun+Next.js → status skill in manifest"
 
-# --- pnpm + Supabase ---
-printf "\n  ${DIM}Testing hook with pnpm + Supabase markers...${RESET}\n"
+# --- pnpm ---
+printf "\n  ${DIM}Testing hook with pnpm markers...${RESET}\n"
 rm -f "$TEMP_DIR/bun.lock" "$TEMP_DIR/next.config.ts"
 touch "$TEMP_DIR/pnpm-lock.yaml"
-mkdir -p "$TEMP_DIR/supabase"
 hook_out=$(run_hook)
 print_output "$hook_out"
-assert_contains "$hook_out" "Package manager: pnpm" "pnpm+Supabase → Package manager: pnpm"
-assert_contains "$hook_out" "Supabase: true" "pnpm+Supabase → Supabase: true"
-assert_contains "$hook_out" "typecheck=pnpm tsc --noEmit" "pnpm+Supabase → typecheck command"
+assert_contains "$hook_out" "Package manager: pnpm" "pnpm → Package manager: pnpm"
+assert_contains "$hook_out" "typecheck=pnpm tsc --noEmit" "pnpm → typecheck command"
 
 # --- Python/uv ---
 printf "\n  ${DIM}Testing hook with Python/uv markers...${RESET}\n"
@@ -257,13 +256,39 @@ for skill in orchestrate phase investigate; do
 done
 
 # Auto-invocable skills must NOT have it
-for skill in gate status supabase-migrate; do
+for skill in gate status; do
   if head -10 "$PLUGIN_DIR/skills/$skill/SKILL.md" | grep -q "disable-model-invocation: true"; then
     fail "skills/$skill — should NOT block auto-invocation (read-only/auto-trigger skill)"
   else
     pass "skills/$skill — correctly allows auto-invocation"
   fi
 done
+
+# ─── Marketplace Readiness Assets ──────────────────────────────────────
+
+header "Marketplace Readiness Assets"
+
+if [[ -f "$PLUGIN_DIR/MARKETPLACE_SUBMISSION.md" ]]; then
+  pass "MARKETPLACE_SUBMISSION.md — exists"
+else
+  warn "MARKETPLACE_SUBMISSION.md — missing (add submission copy and prompts)"
+fi
+
+if [[ -f "$PLUGIN_DIR/assets/plangate-marketplace-card.svg" ]]; then
+  pass "assets/plangate-marketplace-card.svg — exists (1200x630 listing image)"
+else
+  warn "assets/plangate-marketplace-card.svg — missing listing image asset"
+fi
+
+if command -v claude >/dev/null 2>&1; then
+  if claude plugin validate "$PLUGIN_DIR" >/dev/null 2>&1; then
+    pass "claude plugin validate — passed"
+  else
+    fail "claude plugin validate — failed"
+  fi
+else
+  warn "claude CLI not found — skipped 'claude plugin validate'"
+fi
 
 # ─── Summary ──────────────────────────────────────────────────────────
 
@@ -363,6 +388,7 @@ else
 fi
 
 printf "\n${BOLD}Installation:${RESET}\n"
-printf "  ${DIM}# From the target project directory:${RESET}\n"
-printf "  ${CYAN}claude /install-plugin file://%s${RESET}\n" "$PLUGIN_DIR"
+printf "  ${DIM}# Add as marketplace, then install:${RESET}\n"
+printf "  ${CYAN}/plugin marketplace add %s${RESET}\n" "$PLUGIN_DIR"
+printf "  ${CYAN}/plugin install plangate@plangate${RESET}\n"
 printf "\n"

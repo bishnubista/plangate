@@ -1,6 +1,6 @@
 ---
 name: status
-description: "Show current phase, task progress, and orchestration state at a glance. Read-only — safe to auto-invoke."
+description: "Show current phase, task progress, and orchestration state. Use when the user says 'status', 'progress', 'where are we', or 'what's left'."
 ---
 
 # Status: Project Progress Overview
