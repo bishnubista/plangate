@@ -221,7 +221,7 @@ Run validation directly via Bash (no subagent — this is objective pass/fail):
 
 Use the stack-appropriate commands from the table above or from `.plangate.json` if present.
 
-**Note on optional linters:** For stacks where the linter is optional (detekt, golangci-lint, clippy, swiftlint), check if the command exists before running. Skip with a warning if not installed.
+**Note on optional linters:** For stacks where the linter is optional (detekt, golangci-lint, clippy, swiftlint), check if the command exists before running (e.g., `command -v golangci-lint >/dev/null`). Skip with a warning if not installed.
 
 **If the build gate fails:**
 1. Read the error output carefully
