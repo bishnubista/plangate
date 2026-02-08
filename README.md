@@ -331,7 +331,7 @@ plangate/
 Run the self-test to validate the plugin structure:
 
 ```bash
-./try-plangate.sh              # 26 structure checks
+./try-plangate.sh              # 55 checks (structure + hook output validation)
 ./try-plangate.sh --scaffold   # Also create a sample project
 ```
 
