@@ -57,11 +57,22 @@ Examples:
 git checkout -b feat/phase-{N}-{description}
 ```
 
+### Step 3.5: Ensure .plangate/ is gitignored
+
+Check if `.plangate/` is in `.gitignore`. If not, add it:
+
+```bash
+grep -q '\.plangate/' .gitignore 2>/dev/null || echo -e '\n# Plangate orchestration state\n.plangate/' >> .gitignore
+```
+
+This prevents checkpoint files from being committed. Stage the `.gitignore` change if modified.
+
 ### Step 4: Update PLAN.md Status
 
 Change the phase status to "In Progress":
 - Find the phase heading in PLAN.md
 - If there's a status indicator, update it (e.g., `**Status: In Progress**`)
+- Stage both PLAN.md and .gitignore (if modified)
 - Commit this change: `git commit -m "chore: start phase {N} — {description}"`
 
 ### Step 5: Report
@@ -115,6 +126,19 @@ Update the phase status to "Complete":
 - Commit: `git commit -m "chore: complete phase {N}"`
 
 ### Step 5: Push and Create PR
+
+First, verify a remote exists:
+
+```bash
+git remote get-url origin 2>/dev/null
+```
+
+If no remote is configured:
+1. Ask the user: "No Git remote configured. Would you like to create a GitHub repo with `gh repo create`, or skip the PR step?"
+2. If they want to create: run `gh repo create {project-name} --private --source=. --push`, then push `main` separately (`git push origin main`)
+3. If they want to skip: report that the phase is complete locally and they can push/PR later. STOP here.
+
+If remote exists, push:
 
 ```bash
 git push -u origin feat/phase-{N}-{description}

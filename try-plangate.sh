@@ -49,7 +49,7 @@ header "Plugin Structure"
 
 header "Skills"
 
-expected_skills=(orchestrate gate phase investigate supabase-migrate)
+expected_skills=(orchestrate gate phase investigate status supabase-migrate)
 for skill in "${expected_skills[@]}"; do
   if [[ -f "$PLUGIN_DIR/skills/$skill/SKILL.md" ]]; then
     # Check frontmatter has name field
@@ -67,7 +67,7 @@ done
 
 header "Commands"
 
-expected_commands=(orchestrate gate phase investigate supabase-migrate)
+expected_commands=(orchestrate gate phase investigate status supabase-migrate)
 for cmd in "${expected_commands[@]}"; do
   if [[ -f "$PLUGIN_DIR/commands/$cmd.md" ]]; then
     pass "commands/$cmd.md — exists"
@@ -100,40 +100,118 @@ fi
 
 header "Session Hook Output (simulated)"
 
-# Test the hook with a fake project dir
-printf "  ${DIM}Testing hook with no project markers...${RESET}\n"
+# Helper: run hook, print output, and assert expected strings
 TEMP_DIR=$(mktemp -d)
-CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
-  printf "  ${DIM}│${RESET} %s\n" "$line"
-done
-pass "Hook runs with empty project (unknown stack)"
 
-# Test with bun + next.js markers
+run_hook() {
+  CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null
+}
+
+print_output() {
+  local output="$1"
+  while IFS= read -r line; do
+    printf "  ${DIM}│${RESET} %s\n" "$line"
+  done <<< "$output"
+}
+
+assert_contains() {
+  local output="$1" expected="$2" label="$3"
+  if echo "$output" | grep -qF "$expected"; then
+    pass "$label"
+  else
+    fail "$label (expected '$expected' in output)"
+  fi
+}
+
+# --- Empty project (unknown stack) ---
+printf "  ${DIM}Testing hook with no project markers...${RESET}\n"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: unknown" "Empty project → Stack: unknown"
+assert_contains "$hook_out" "Package manager: none" "Empty project → Package manager: none"
+
+# --- bun + Next.js ---
 printf "\n  ${DIM}Testing hook with bun + Next.js markers...${RESET}\n"
 touch "$TEMP_DIR/package.json" "$TEMP_DIR/bun.lock" "$TEMP_DIR/next.config.ts"
-CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
-  printf "  ${DIM}│${RESET} %s\n" "$line"
-done
-pass "Hook detects bun + Next.js stack"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: nextjs" "bun+Next.js → Stack: nextjs"
+assert_contains "$hook_out" "Package manager: bun" "bun+Next.js → Package manager: bun"
+assert_contains "$hook_out" "typecheck=bunx tsc --noEmit" "bun+Next.js → typecheck command"
+assert_contains "$hook_out" "build=bun run build" "bun+Next.js → build command"
+assert_contains "$hook_out" "plangate:status" "bun+Next.js → status skill in manifest"
 
-# Test with pnpm + supabase
+# --- pnpm + Supabase ---
 printf "\n  ${DIM}Testing hook with pnpm + Supabase markers...${RESET}\n"
 rm -f "$TEMP_DIR/bun.lock" "$TEMP_DIR/next.config.ts"
 touch "$TEMP_DIR/pnpm-lock.yaml"
 mkdir -p "$TEMP_DIR/supabase"
-CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
-  printf "  ${DIM}│${RESET} %s\n" "$line"
-done
-pass "Hook detects pnpm + Supabase stack"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Package manager: pnpm" "pnpm+Supabase → Package manager: pnpm"
+assert_contains "$hook_out" "Supabase: true" "pnpm+Supabase → Supabase: true"
+assert_contains "$hook_out" "typecheck=pnpm tsc --noEmit" "pnpm+Supabase → typecheck command"
 
-# Test with python/uv
+# --- Python/uv ---
 printf "\n  ${DIM}Testing hook with Python/uv markers...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/pyproject.toml"
-CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
-  printf "  ${DIM}│${RESET} %s\n" "$line"
-done
-pass "Hook detects Python/uv stack"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: python" "Python → Stack: python"
+assert_contains "$hook_out" "Package manager: uv" "Python → Package manager: uv"
+assert_contains "$hook_out" "typecheck=uv run pyright" "Python → typecheck command"
+assert_contains "$hook_out" "build=SKIP" "Python → build=SKIP"
+
+# --- Kotlin/Gradle ---
+printf "\n  ${DIM}Testing hook with Kotlin/Gradle markers...${RESET}\n"
+rm -rf "${TEMP_DIR:?}"/*
+touch "$TEMP_DIR/build.gradle.kts"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: kotlin" "Kotlin → Stack: kotlin"
+assert_contains "$hook_out" "Package manager: gradle" "Kotlin → Package manager: gradle"
+assert_contains "$hook_out" "typecheck=./gradlew compileKotlin" "Kotlin → typecheck command"
+
+# --- Go ---
+printf "\n  ${DIM}Testing hook with Go markers...${RESET}\n"
+rm -rf "${TEMP_DIR:?}"/*
+touch "$TEMP_DIR/go.mod"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: go" "Go → Stack: go"
+assert_contains "$hook_out" "Package manager: go" "Go → Package manager: go"
+assert_contains "$hook_out" "typecheck=go vet ./..." "Go → typecheck command"
+
+# --- Rust/Cargo ---
+printf "\n  ${DIM}Testing hook with Rust/Cargo markers...${RESET}\n"
+rm -rf "${TEMP_DIR:?}"/*
+touch "$TEMP_DIR/Cargo.toml"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: rust" "Rust → Stack: rust"
+assert_contains "$hook_out" "Package manager: cargo" "Rust → Package manager: cargo"
+assert_contains "$hook_out" "typecheck=cargo check" "Rust → typecheck command"
+
+# --- Swift/SPM ---
+printf "\n  ${DIM}Testing hook with Swift/SPM markers...${RESET}\n"
+rm -rf "${TEMP_DIR:?}"/*
+touch "$TEMP_DIR/Package.swift"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Stack: swift" "Swift → Stack: swift"
+assert_contains "$hook_out" "Package manager: spm" "Swift → Package manager: spm"
+assert_contains "$hook_out" "typecheck=swift build" "Swift → typecheck command"
+
+# --- Custom config ---
+printf "\n  ${DIM}Testing hook with .plangate.json custom config...${RESET}\n"
+rm -rf "${TEMP_DIR:?}"/*
+touch "$TEMP_DIR/package.json" "$TEMP_DIR/bun.lock"
+echo '{"commands":{"build":"custom-build"}}' > "$TEMP_DIR/.plangate.json"
+hook_out=$(run_hook)
+print_output "$hook_out"
+assert_contains "$hook_out" "Custom config: true" "Custom config → Custom config: true"
+assert_contains "$hook_out" "build=custom-build" "Custom config → build=custom-build"
 
 rm -rf "$TEMP_DIR"
 
@@ -179,7 +257,7 @@ for skill in orchestrate phase investigate; do
 done
 
 # Auto-invocable skills must NOT have it
-for skill in gate supabase-migrate; do
+for skill in gate status supabase-migrate; do
   if head -10 "$PLUGIN_DIR/skills/$skill/SKILL.md" | grep -q "disable-model-invocation: true"; then
     fail "skills/$skill — should NOT block auto-invocation (read-only/auto-trigger skill)"
   else
@@ -274,6 +352,7 @@ PLAN
   printf "  ${CYAN}claude${RESET}          ${DIM}# Start Claude Code${RESET}\n"
   printf "\n${BOLD}Then try these commands in Claude Code:${RESET}\n"
   printf "  ${CYAN}/plangate:gate${RESET}                        ${DIM}# Run validation gate${RESET}\n"
+  printf "  ${CYAN}/plangate:status${RESET}                      ${DIM}# Show progress overview${RESET}\n"
   printf "  ${CYAN}/plangate:phase start 1 foundation${RESET}    ${DIM}# Start phase 1${RESET}\n"
   printf "  ${CYAN}/plangate:orchestrate 1${RESET}               ${DIM}# Execute phase 1 tasks${RESET}\n"
   printf "  ${CYAN}/plangate:investigate slow-query${RESET}       ${DIM}# Create investigation doc${RESET}\n"

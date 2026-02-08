@@ -18,7 +18,7 @@ try-plangate.sh                  # Plugin verification script
 ```bash
 git clone https://github.com/bishnubista/plangate.git
 cd plangate
-./try-plangate.sh                # 26 structure checks
+./try-plangate.sh                # 55 structure checks
 ./try-plangate.sh --scaffold     # Create a test project
 ```
 
