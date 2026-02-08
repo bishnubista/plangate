@@ -1,0 +1,28 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "plangate",
+  "metadata": {
+    "description": "PLAN.md-driven development with quality gates for Claude Code"
+  },
+  "owner": {
+    "name": "Bishnu Bista",
+    "email": "collab@bishnu.dev"
+  },
+  "plugins": [
+    {
+      "name": "plangate",
+      "description": "PLAN.md-driven development with quality gates. Each task flows through: implement (subagent) > build gate (objective pass/fail) > independent review (subagent).",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "Bishnu Bista",
+        "email": "collab@bishnu.dev"
+      },
+      "homepage": "https://github.com/bishnubista/plangate",
+      "repository": "https://github.com/bishnubista/plangate",
+      "license": "MIT",
+      "keywords": ["workflow", "orchestration", "quality-gates", "code-review", "plan-driven"],
+      "category": "productivity"
+    }
+  ]
+}
