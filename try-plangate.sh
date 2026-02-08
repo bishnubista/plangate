@@ -154,7 +154,7 @@ assert_contains "$hook_out" "typecheck=pnpm tsc --noEmit" "pnpm+Supabase → typ
 
 # --- Python/uv ---
 printf "\n  ${DIM}Testing hook with Python/uv markers...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/pyproject.toml"
 hook_out=$(run_hook)
 print_output "$hook_out"
@@ -165,7 +165,7 @@ assert_contains "$hook_out" "build=SKIP" "Python → build=SKIP"
 
 # --- Kotlin/Gradle ---
 printf "\n  ${DIM}Testing hook with Kotlin/Gradle markers...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/build.gradle.kts"
 hook_out=$(run_hook)
 print_output "$hook_out"
@@ -175,7 +175,7 @@ assert_contains "$hook_out" "typecheck=./gradlew compileKotlin" "Kotlin → type
 
 # --- Go ---
 printf "\n  ${DIM}Testing hook with Go markers...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/go.mod"
 hook_out=$(run_hook)
 print_output "$hook_out"
@@ -185,7 +185,7 @@ assert_contains "$hook_out" "typecheck=go vet ./..." "Go → typecheck command"
 
 # --- Rust/Cargo ---
 printf "\n  ${DIM}Testing hook with Rust/Cargo markers...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/Cargo.toml"
 hook_out=$(run_hook)
 print_output "$hook_out"
@@ -195,7 +195,7 @@ assert_contains "$hook_out" "typecheck=cargo check" "Rust → typecheck command"
 
 # --- Swift/SPM ---
 printf "\n  ${DIM}Testing hook with Swift/SPM markers...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/Package.swift"
 hook_out=$(run_hook)
 print_output "$hook_out"
@@ -205,7 +205,7 @@ assert_contains "$hook_out" "typecheck=swift build" "Swift → typecheck command
 
 # --- Custom config ---
 printf "\n  ${DIM}Testing hook with .plangate.json custom config...${RESET}\n"
-rm -rf "$TEMP_DIR"/*
+rm -rf "${TEMP_DIR:?}"/*
 touch "$TEMP_DIR/package.json" "$TEMP_DIR/bun.lock"
 echo '{"commands":{"build":"custom-build"}}' > "$TEMP_DIR/.plangate.json"
 hook_out=$(run_hook)

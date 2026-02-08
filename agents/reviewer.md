@@ -83,12 +83,14 @@ At the very end of your review, ALWAYS include this exact JSON block wrapped in 
 
 ```json
 {
-  "verdict": "APPROVED" or "ISSUES_FOUND",
+  "verdict": "APPROVED",
   "issue_count": 0,
   "critical_count": 0,
   "important_count": 0,
   "files_reviewed": ["src/lib/api.ts", "src/components/Card.tsx"]
 }
 ```
+
+Use `"verdict": "ISSUES_FOUND"` when reporting issues.
 
 This block must be the last thing in your output. The orchestrator uses it to decide whether to dispatch a fix subagent or proceed to the next task.
