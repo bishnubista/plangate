@@ -135,6 +135,52 @@ CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/
 done
 pass "Hook detects Python/uv stack"
 
+# Test with Kotlin/Gradle markers
+printf "\n  ${DIM}Testing hook with Kotlin/Gradle markers...${RESET}\n"
+rm -rf "$TEMP_DIR"/*
+touch "$TEMP_DIR/build.gradle.kts"
+CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
+  printf "  ${DIM}│${RESET} %s\n" "$line"
+done
+pass "Hook detects Kotlin/Gradle stack"
+
+# Test with Go markers
+printf "\n  ${DIM}Testing hook with Go markers...${RESET}\n"
+rm -rf "$TEMP_DIR"/*
+touch "$TEMP_DIR/go.mod"
+CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
+  printf "  ${DIM}│${RESET} %s\n" "$line"
+done
+pass "Hook detects Go stack"
+
+# Test with Rust/Cargo markers
+printf "\n  ${DIM}Testing hook with Rust/Cargo markers...${RESET}\n"
+rm -rf "$TEMP_DIR"/*
+touch "$TEMP_DIR/Cargo.toml"
+CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
+  printf "  ${DIM}│${RESET} %s\n" "$line"
+done
+pass "Hook detects Rust/Cargo stack"
+
+# Test with Swift/SPM markers
+printf "\n  ${DIM}Testing hook with Swift/SPM markers...${RESET}\n"
+rm -rf "$TEMP_DIR"/*
+touch "$TEMP_DIR/Package.swift"
+CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
+  printf "  ${DIM}│${RESET} %s\n" "$line"
+done
+pass "Hook detects Swift/SPM stack"
+
+# Test with custom config
+printf "\n  ${DIM}Testing hook with .plangate.json custom config...${RESET}\n"
+rm -rf "$TEMP_DIR"/*
+touch "$TEMP_DIR/package.json" "$TEMP_DIR/bun.lock"
+echo '{"commands":{"build":"custom-build"}}' > "$TEMP_DIR/.plangate.json"
+CLAUDE_PROJECT_DIR="$TEMP_DIR" bash "$PLUGIN_DIR/hooks/session-start.sh" 2>/dev/null | while IFS= read -r line; do
+  printf "  ${DIM}│${RESET} %s\n" "$line"
+done
+pass "Hook detects custom config"
+
 rm -rf "$TEMP_DIR"
 
 # ─── Agents Check ─────────────────────────────────────────────────────

@@ -76,3 +76,19 @@ The implementation has problems that must be fixed. For EACH issue:
 - **How to fix** — concrete suggestion (not vague)
 
 Only use ISSUES_FOUND for actual problems. Do NOT flag style preferences, minor naming choices, or things that are correct but you'd personally do differently.
+
+### Structured Verdict Block (Required)
+
+At the very end of your review, ALWAYS include this exact JSON block wrapped in a code fence so the orchestrator can parse your verdict programmatically:
+
+```json
+{
+  "verdict": "APPROVED" or "ISSUES_FOUND",
+  "issue_count": 0,
+  "critical_count": 0,
+  "important_count": 0,
+  "files_reviewed": ["src/lib/api.ts", "src/components/Card.tsx"]
+}
+```
+
+This block must be the last thing in your output. The orchestrator uses it to decide whether to dispatch a fix subagent or proceed to the next task.
