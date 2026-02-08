@@ -15,9 +15,9 @@
 
 - [ ] `./try-plangate.sh` passes (all checks green)
 - [ ] Skills have correct `disable-model-invocation` setting
-- [ ] Commands delegate to skills (thin wrappers only)
+- [ ] No legacy `commands/` wrappers were added
 - [ ] Hook uses `${CLAUDE_PROJECT_DIR:-.}` for paths
-- [ ] README updated if adding new skills/commands
+- [ ] README updated if adding new skills
 - [ ] Tested in a Claude Code session
 
 ## Testing

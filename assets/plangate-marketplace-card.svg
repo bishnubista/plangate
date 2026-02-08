@@ -1,0 +1,51 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">plangate - Claude Code quality gate plugin</title>
+  <desc id="desc">Marketplace card showing the plangate pipeline: implement, gate, review.</desc>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1120" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E1A2F"/>
+      <stop offset="1" stop-color="#133B56"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="165" y1="228" x2="1035" y2="402" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101C32"/>
+      <stop offset="1" stop-color="#1B2D49"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="56" y="56" width="1088" height="518" rx="22" fill="#0B1427" fill-opacity="0.7" stroke="#2A7FBE" stroke-opacity="0.5" stroke-width="2"/>
+
+  <text x="120" y="164" fill="#D4ECFF" font-size="64" font-family="Menlo, Monaco, Consolas, 'Courier New', monospace" font-weight="700">
+    plangate
+  </text>
+  <text x="120" y="214" fill="#8FC6EF" font-size="28" font-family="Menlo, Monaco, Consolas, 'Courier New', monospace">
+    PLAN.md workflow with deterministic quality gates
+  </text>
+
+  <rect x="165" y="248" width="870" height="154" rx="16" fill="url(#panel)" stroke="#2A7FBE" stroke-opacity="0.5"/>
+
+  <rect x="210" y="290" width="220" height="70" rx="10" fill="#1D805E"/>
+  <text x="320" y="332" text-anchor="middle" fill="#E7FFF6" font-size="28" font-family="Menlo, Monaco, Consolas, 'Courier New', monospace" font-weight="700">
+    implement
+  </text>
+
+  <path d="M460 325H565" stroke="#8FC6EF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M558 316L572 325L558 334" stroke="#8FC6EF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="575" y="290" width="170" height="70" rx="10" fill="#C58E1B"/>
+  <text x="660" y="332" text-anchor="middle" fill="#FFF7E4" font-size="28" font-family="Menlo, Monaco, Consolas, 'Courier New', monospace" font-weight="700">
+    gate
+  </text>
+
+  <path d="M760 325H865" stroke="#8FC6EF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M858 316L872 325L858 334" stroke="#8FC6EF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="875" y="290" width="120" height="70" rx="10" fill="#AA5142"/>
+  <text x="935" y="332" text-anchor="middle" fill="#FFF0ED" font-size="28" font-family="Menlo, Monaco, Consolas, 'Courier New', monospace" font-weight="700">
+    review
+  </text>
+
+  <text x="120" y="482" fill="#C7E3FA" font-size="24" font-family="Menlo, Monaco, Consolas, 'Courier New', monospace">
+    stack-aware commands | orchestration checkpoints | pre-PR validation
+  </text>
+</svg>
