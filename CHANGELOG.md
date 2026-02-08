@@ -38,7 +38,7 @@
 
 ### Added
 - Orchestration pipeline: implement > build gate > independent review
-- Stack detection for 9 languages (Node.js, Python, Kotlin, Go, Rust, Swift + package managers)
+- Stack detection for 6 language stacks (Node.js, Python, Kotlin, Go, Rust, Swift) with 9 toolchain configurations
 - Checkpoint/resume for long-running orchestrations
 - Phase lifecycle management (branch, orchestrate, PR)
 - Investigation docs for structured debugging

@@ -67,11 +67,16 @@ if [[ -f "$project_dir/.plangate.json" ]]; then
   has_custom_config=true
 fi
 
+_plangate_jq_warned=false
 read_custom_cmd() {
   local key="$1"
   if command -v jq >/dev/null 2>&1; then
     jq -r --arg key "$key" '.commands[$key] | select(type=="string")' "$project_dir/.plangate.json" 2>/dev/null || true
   else
+    if [[ "$_plangate_jq_warned" == "false" ]]; then
+      echo "plangate: jq not found; falling back to grep/sed for .plangate.json (may fail on escaped quotes or special characters)" >&2
+      _plangate_jq_warned=true
+    fi
     grep -o "\"${key}\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$project_dir/.plangate.json" 2>/dev/null | sed 's/.*:.*"\(.*\)"/\1/' || true
   fi
 }

@@ -7,7 +7,7 @@ description: "Stack-aware pre-PR validation gate. Auto-detects stack, validates 
 
 ## Overview
 
-Validates the project is in a clean, passing state before PR creation. Auto-detects the stack from the session manifest and selects the appropriate validation commands. Supports 9 language stacks. This skill is **read-only** — it reports pass/fail with actionable suggestions but never modifies code.
+Validates the project is in a clean, passing state before PR creation. Auto-detects the stack from the session manifest and selects the appropriate validation commands. Supports 6 language stacks (Node.js, Python, Kotlin, Go, Rust, Swift) with 9 toolchain configurations. This skill is **read-only** — it reports pass/fail with actionable suggestions but never modifies code.
 
 ## The Process
 
