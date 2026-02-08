@@ -20,6 +20,7 @@ This catches the failure mode where AI agents mark their own homework: implement
 |---------|-------------|
 | `/plangate:orchestrate [N]` | Execute phase N tasks through the gate pipeline |
 | `/plangate:gate` | Typecheck + lint + build + tests validation |
+| `/plangate:status` | Show current phase, task progress, orchestration state |
 | `/plangate:phase start N` / `finish` | Branch creation, PLAN.md updates, PR creation |
 | `/plangate:investigate {name}` | Structured investigation doc for complex bugs |
 | `/plangate:supabase-migrate` | Regen types, check RLS policies after DDL changes |
@@ -60,12 +61,14 @@ Stack: nextjs | Package manager: bun | Supabase: false
 
 Auto-invocable skills (Claude can use directly):
   plangate:gate              — Typecheck + lint + build validation.
+  plangate:status            — Show current phase, task progress, and orchestration state.
   plangate:supabase-migrate  — After DDL changes: regen types, check RLS/indexes.
 
 User-invoked workflows (run via / commands):
   /plangate:orchestrate [N]        — Multi-task orchestration with sequential gates.
   /plangate:phase start N | finish — Phase lifecycle.
   /plangate:investigate [name]     — Structured investigation doc.
+  /plangate:status                 — Quick project progress overview.
 </plangate-manifest>
 ```
 
@@ -306,19 +309,21 @@ plangate/
   commands/
     orchestrate.md           # /plangate:orchestrate
     gate.md                  # /plangate:gate
+    status.md                # /plangate:status
     phase.md                 # /plangate:phase
     investigate.md           # /plangate:investigate
     supabase-migrate.md      # /plangate:supabase-migrate
   skills/
     orchestrate/SKILL.md     # Orchestration pipeline logic
     gate/SKILL.md            # Validation pipeline logic
+    status/SKILL.md          # Progress overview logic
     phase/SKILL.md           # Phase lifecycle logic
     investigate/SKILL.md     # Investigation doc logic
     supabase-migrate/SKILL.md # Post-migration checks
   hooks/
     hooks.json               # Hook registration
     session-start.sh         # Stack detection
-  try-plangate.sh            # Plugin verification (26 checks)
+  try-plangate.sh            # Plugin verification (55 checks)
 ```
 
 ## Verification

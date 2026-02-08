@@ -160,9 +160,29 @@ For each task in the phase:
 1. Run full test suite
 2. Invoke `plangate:gate` skill
 3. Archive the checkpoint file
-4. Offer to finish the phase using `/plangate:phase finish`
+4. Print the **Pipeline Summary** (see below)
+5. Offer to finish the phase using `/plangate:phase finish`
 
 **Important:** Do NOT update PLAN.md status (e.g., "In Progress" → "Complete") or commit a phase-completion update. That is the responsibility of `plangate:phase finish`, which owns lifecycle transitions. Committing here would create duplicate commits.
+
+### Pipeline Summary
+
+After all tasks complete and the final gate passes, output a summary in this format:
+
+```text
+## Phase {N} Orchestration Summary
+
+| Task | Implement | Gate | Review | Retries |
+|------|-----------|------|--------|---------|
+| {id}: {short title} | PASS | PASS | APPROVED | 0 |
+| {id}: {short title} | PASS | PASS (retry 1) | APPROVED | 1 |
+
+**Results:** {total} tasks completed, {retry_total} total retries
+**Final gate:** PASSED
+**Ready for:** `/plangate:phase finish`
+```
+
+Build the summary from the checkpoint file (`.plangate/orchestration-state.json`). Count retries per task by checking `retry_count` fields. This gives the user a clear picture of pipeline health — clean runs (0 retries) mean well-written task specs, while high retry counts suggest tasks need clearer acceptance criteria.
 
 ---
 
